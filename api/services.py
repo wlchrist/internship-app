@@ -15,8 +15,8 @@ class InternshipService:
         # Fantastic Jobs API configuration
         self.api_key = os.getenv("RAPIDAPI_KEY", "b55b10072cmshaa3327eadfbb864p1b5030jsnd01b971a8dff")
         self.api_host = "internships-api.p.rapidapi.com"
-        # Focused query for software engineering internships
-        self.api_url = "https://internships-api.p.rapidapi.com/active-jb-7d?location_filter=United+States&description_filter=internship+AND+%28software+OR+programming+OR+developer+OR+computer+science%29&offset=0"
+        # Comprehensive query for CS internships with advanced filtering
+        self.api_url = "https://internships-api.p.rapidapi.com/active-jb-7d?location_filter=United+States&description_filter=%28intern+OR+internship+OR+co-op%29+AND+%28Python+OR+Java+OR+C%2B%2B+OR+JavaScript+OR+Go+OR+Rust%29+AND+%28develop+OR+build+OR+code+OR+software%29+AND+-senior+-staff+-lead+-principal&offset=0&advanced_title_filter=%28%27Software+Engineering%27+%7C+%27Full-Stack+Developer%27+%7C+%27Front-End+Engineering%27+%7C+%27Back-End+Engineering%27+%7C+%27Site+Reliability%27+%7C+SRE+%7C+%27iOS+Software%27+%7C+%27Android+Software%27+%7C+%27AI+Research%27+%7C+%27AI+Scientist%27+%7C+%27Machine+Learning+Engineer%27+%7C+%27Data+Science%27+%7C+%27Computer+Vision%27+%7C+%27Deep+Learning%27+%7C+NLP+%7C+%27Natural+Language+Processing%27+%7C+%27Offensive+Security%27+%7C+%27AI+Cyber+Security%27+%7C+%27Cloud+Engineer%27+%7C+AWS+%7C+Azure+%7C+DevOps+%7C+Platform+%7C+%27Data+Infrastructure%27+%7C+%27Quantitative+Developer%27+%7C+%27Quantitative+Research%27+%7C+%27Embedded+Software%27+%7C+Autonomy+%7C+Robotics+%7C+Blockchain+%7C+Web3+%7C+AR+%7C+VR+%7C+XR+%7C+%27Growth+Data%27+%7C+Analytics+%7C+%27Information+Security%27+%7C+Risk%29+%26+Intern%3A*"
         
     async def get_internships(self) -> List[Internship]:
         """Get internships from cache or fetch if needed"""
@@ -193,42 +193,29 @@ class InternshipService:
                 description = job.get('linkedin_org_description', "No description available")
                 if len(description) > 500:
                     description = description[:500] + "..."
-                
-                # Strict filtering for Computer Science related positions
-                cs_keywords = [
-                    'software', 'programming', 'developer', 'computer science', 'cs',
-                    'frontend', 'backend', 'full stack', 'devops', 'data science',
-                    'machine learning', 'ai', 'artificial intelligence', 'python', 'java',
-                    'javascript', 'c++', 'react', 'node', 'web development', 'mobile',
-                    'ios', 'android', 'cloud', 'aws', 'azure', 'cybersecurity', 'security'
-                ]
-                
-                # Exclude non-CS positions
+
+                # Since the API query already filters for CS internships, we should accept most results
+                # Only exclude obvious non-CS positions
                 exclude_keywords = [
                     'accountant', 'accounting', 'finance', 'marketing', 'sales', 'hr',
-                    'human resources', 'business', 'management', 'analyst', 'consultant',
-                    'mechanical', 'civil', 'electrical', 'chemical', 'biomedical'
+                    'human resources', 'business analyst', 'management consultant',
+                    'mechanical engineer', 'civil engineer', 'electrical engineer', 
+                    'chemical engineer', 'biomedical engineer', 'nurse', 'teacher'
                 ]
-                
+
                 title_lower = title.lower()
                 desc_lower = description.lower()
-                
+
                 # Check for exclusions first
                 is_excluded = any(keyword in title_lower or keyword in desc_lower for keyword in exclude_keywords)
                 if is_excluded:
                     if i < 3:  # Debug for first 3 jobs
                         print(f"Job {i+1}: '{title}' - EXCLUDED (non-CS)")
                     continue
-                
-                # Check if it's CS-related
-                is_cs_related = any(keyword in title_lower or keyword in desc_lower for keyword in cs_keywords)
-                
+
                 # Debug: print filtering decision
                 if i < 3:  # Only for first 3 jobs
-                    print(f"Job {i+1}: '{title}' - CS Related: {is_cs_related}")
-                
-                if not is_cs_related:
-                    continue  # Skip non-CS positions
+                    print(f"Job {i+1}: '{title}' - ACCEPTED (CS-related)")
                 
                 # Handle salary data
                 salary_raw = job.get('salary_raw', {})

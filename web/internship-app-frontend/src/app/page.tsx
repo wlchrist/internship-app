@@ -45,11 +45,14 @@ export default function Home() {
   const handleRefresh = async () => {
     try {
       setLoading(true);
+      console.log('Triggering refresh on backend');
       // Trigger refresh on backend
       await fetch('http://localhost:8000/internships/refresh');
+      console.log('Refresh triggered, fetching updated data');
       // Then fetch updated data
       await fetchInternships();
     } catch (err) {
+      console.error('Error refreshing:', err);
       setError(err instanceof Error ? err.message : 'Failed to refresh');
       setLoading(false);
     }
@@ -70,6 +73,7 @@ export default function Home() {
           <p className="text-lg text-gray-600 mb-6">
             Discover amazing internship opportunities from top companies
           </p>
+          
           
           <div className="flex justify-center items-center gap-4 mb-6">
             <button
