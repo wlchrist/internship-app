@@ -1,22 +1,25 @@
 # 🎯 Internship Aggregator
 
-A full-stack application that aggregates internship postings from external APIs and presents them in a clean, modern web interface. The application fetches internship data every 24 hours and displays them in real-time.
+A full-stack application that aggregates Computer Science internship postings from the Fantastic Jobs API and presents them in a clean, modern web interface. The application fetches real internship data every 24 hours and displays them in real-time.
 
 ## 🏗️ Architecture
 
 - **Frontend**: Next.js 15.5.4 with React 19.1.0, TypeScript, and Tailwind CSS
 - **Backend**: FastAPI with Python 3.13
-- **Data**: Mock internship data (easily replaceable with real APIs)
+- **Data Source**: Fantastic Jobs API via RapidAPI
 - **Auto-refresh**: Data refreshes every 24 hours automatically
+- **Filtering**: Focuses on Computer Science internships (Software Engineering, Data Science, AI/ML, etc.)
 
 ## ✨ Features
 
-- 📋 **Real-time Internship Listings**: View current internship opportunities
+- 📋 **Real-time CS Internship Listings**: View current Computer Science internship opportunities
 - 🔄 **Auto-refresh**: Data refreshes every 24 hours automatically
 - 🎨 **Modern UI**: Clean, responsive design with Tailwind CSS
 - 📱 **Mobile-friendly**: Responsive design that works on all devices
 - 🔍 **Detailed Information**: Company, location, salary, requirements, and more
 - 🌐 **Remote Work Support**: Clear indication of remote opportunities
+- 🎯 **CS-Focused**: Specifically targets Software Engineering, Data Science, AI/ML, and related fields
+- 🚫 **Smart Filtering**: Excludes non-CS positions (accounting, finance, marketing, etc.)
 
 ## 🚀 Quick Start
 
@@ -78,6 +81,31 @@ The startup scripts will automatically handle virtual environment creation and d
    # Start development server
    npm run dev
    ```
+
+## 🔧 API Configuration
+
+The application uses the Fantastic Jobs API via RapidAPI. The API key is already configured, but you can customize it:
+
+### Environment Variables
+
+Create a `.env` file in the `api` directory (optional):
+
+```bash
+# API Configuration
+RAPIDAPI_KEY=your_rapidapi_key_here
+API_HOST=0.0.0.0
+API_PORT=8000
+```
+
+### Current API Query
+
+The application uses a comprehensive query to fetch CS internships:
+
+- **Location**: United States
+- **Keywords**: Python, Java, C++, JavaScript, Go, Rust
+- **Roles**: Software Engineering, Full-Stack Developer, AI Research, Machine Learning Engineer, Data Science, etc.
+- **Exclusions**: Senior, staff, lead, principal positions
+- **Focus**: Internship and co-op positions only
 
 ## 📡 API Endpoints
 
@@ -330,6 +358,11 @@ This project is licensed under the MIT License.
    - The `.gitignore` file should prevent this automatically
    - If you see this error, remove large files: `git rm -r --cached node_modules/ api/fastapi/`
    - Then commit: `git add .gitignore && git commit -m "Add gitignore"`
+
+8. **API Rate Limiting**:
+   - The Fantastic Jobs API has rate limits
+   - If you hit limits, the app falls back to mock data
+   - Consider upgrading your RapidAPI plan for higher limits
 
 ### Getting Help
 
