@@ -1,67 +1,62 @@
-# Sprint 1 Report 
+# Sprint x Report 
 Video Link: 
 ## What's New (User Facing)
- * Real-time Computer Science internship listings from Fantastic Jobs API
- * Comprehensive filtering for CS roles (Software Engineering, Data Science, AI/ML, etc.)
- * Modern, responsive web interface with internship cards
- * Auto-refresh functionality every 24 hours
- * Manual refresh button for immediate data updates
- * Smart filtering that excludes non-CS positions (accounting, finance, marketing)
- * Detailed internship information including company, location, salary, and requirements
+ * Feature 1 or Bug Fix 1
+ * Feature 2 or Bug Fix 2
+ * Feature n or Bug Fix n
 
 ## Work Summary (Developer Facing)
-Our team successfully built a full-stack internship aggregator application from scratch, integrating with the Fantastic Jobs API via RapidAPI to fetch real Computer Science internship data. We overcame several technical challenges including API response parsing, CORS configuration, virtual environment setup, and filtering logic implementation. The backend uses FastAPI with Python 3.13, while the frontend leverages Next.js 15.5.4 with React 19.1.0 and Tailwind CSS. We implemented comprehensive query parameters to target CS-specific roles and developed robust error handling with fallback to mock data when API limits are reached. The application successfully fetches and displays 7+ real internship postings with proper filtering and transformation of API responses to our internal data models.
+Provide a one paragraph synposis of what your team accomplished this sprint. Don't repeat the "What's New" list of features. Instead, help the instructor understand how you went about the work described there, any barriers you overcame, and any significant learnings for your team.
 
 ## Unfinished Work
-All planned features for this sprint have been completed successfully. The application is fully functional with real API integration, comprehensive filtering, and a polished user interface.
+If applicable, explain the work you did not finish in this sprint. For issues/user stories in the current sprint that have not been closed, (a) any progress toward completion of the issues has been clearly tracked (by checking the checkboxes of  acceptance criteria), (b) a comment has been added to the issue to explain why the issue could not be completed (e.g., "we ran out of time" or "we did not anticipate it would be so much work"), and (c) the issue is added to a subsequent sprint, so that it can be addressed later.
 
 ## Completed Issues/User Stories
 Here are links to the issues that we completed in this sprint:
 
- * [Fantastic Jobs API Integration](https://github.com/wlchrist/internship-app/commit/5b2351e) - Integrated real internship data from Fantastic Jobs API
- * [Frontend Development](https://github.com/wlchrist/internship-app/commit/8a241d5) - Built responsive Next.js frontend with internship cards
- * [Backend API Development](https://github.com/wlchrist/internship-app/commit/5b2351e) - Created FastAPI backend with comprehensive CS internship filtering
- * [Documentation Updates](https://github.com/wlchrist/internship-app/commit/8a241d5) - Updated README with setup instructions and API configuration details
+ * URL of issue 1
+ * URL of issue 2
+ * URL of issue n
 
-## Incomplete Issues/User Stories
-Here are links to issues we worked on but did not complete in this sprint:
-
- * No incomplete issues - all planned work was completed successfully
+ Desirables (Remove this section when you save the file):
+  * Each issue should be assigned to a milestone
+  * Each completed issue should be assigned to a pull request
+  * Each completed pull request should include a link to a "Before and After" video
+  * All team members who contributed to the issue should be assigned to it on GitHub
+  * Each issue should be assigned story points using a label
+  * Story points contribution of each team member should be indicated in a comment
+ 
+ ## Incomplete Issues/User Stories
+ Here are links to issues we worked on but did not complete in this sprint:
+ 
+ * URL of issue 1 <<One sentence explanation of why issue was not completed>>
+ * URL of issue 2 <<One sentence explanation of why issue was not completed>>
+ * URL of issue n <<One sentence explanation of why issue was not completed>>
+ 
+ Examples of explanations (Remove this section when you save the file):
+  * "We ran into a complication we did not anticipate (explain briefly)." 
+  * "We decided that the feature did not add sufficient value for us to work on it in this sprint (explain briefly)."
+  * "We could not reproduce the bug" (explain briefly).
+  * "We did not get to this issue because..." (explain briefly)
 
 ## Code Files for Review
 Please review the following code files, which were actively developed during this sprint, for quality:
- * [Backend Main Application](https://github.com/wlchrist/internship-app/blob/main/api/main.py)
- * [API Services & Business Logic](https://github.com/wlchrist/internship-app/blob/main/api/services.py)
- * [Data Models](https://github.com/wlchrist/internship-app/blob/main/api/models.py)
- * [Frontend Main Page](https://github.com/wlchrist/internship-app/blob/main/web/internship-app-frontend/src/app/page.tsx)
- * [Internship Card Component](https://github.com/wlchrist/internship-app/blob/main/web/internship-app-frontend/src/app/components/InternshipCard.tsx)
- * [Project Documentation](https://github.com/wlchrist/internship-app/blob/main/README.md)
-
+ * [Name of code file 1](https://github.com/your_repo/file_extension)
+ * [Name of code file 2](https://github.com/your_repo/file_extension)
+ * [Name of code file 3](https://github.com/your_repo/file_extension)
+ 
 ## Retrospective Summary
 Here's what went well:
-  * Successful integration with external API (Fantastic Jobs API via RapidAPI)
-  * Clean separation of concerns between frontend and backend
-  * Comprehensive filtering logic for CS-specific internships
-  * Robust error handling with fallback mechanisms
-  * Modern, responsive UI with Tailwind CSS
-  * Complete documentation and setup instructions
-  * Effective use of TypeScript for type safety
-  * Automated startup scripts for easy development setup
-
+  * Item 1
+  * Item 2
+  * Item x
+ 
 Here's what we'd like to improve:
-   * API rate limiting handling could be more sophisticated
-   * Could add more detailed error messages for debugging
-   * Consider adding pagination for large result sets
-   * Add more comprehensive testing coverage
-   * Implement caching to reduce API calls
-   * Add user authentication and saved searches
-
+   * Item 1
+   * Item 2
+   * Item x
+  
 Here are changes we plan to implement in the next sprint:
-   * Add user authentication and personalized internship tracking
-   * Implement advanced search and filtering options
-   * Add email notifications for new matching internships
-   * Integrate additional job board APIs for broader coverage
-   * Add internship application tracking features
-   * Implement user feedback and rating system
-   * Add mobile app development
-   * Enhance data analytics and reporting features
+   * Item 1
+   * Item 2
+   * Item x

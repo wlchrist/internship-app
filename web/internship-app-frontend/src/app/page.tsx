@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import InternshipCard from './components/InternshipCard';
 import LoadingSpinner from './components/LoadingSpinner';
+import NotificationSubscription from './components/NotificationSubscription';
 
 interface Internship {
   id: string;
@@ -127,6 +128,11 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* Notification Subscription Section */}
+        <div className="mb-12">
+          <NotificationSubscription />
+        </div>
 
         {/* Loading State */}
         {loading && internships.length === 0 && <LoadingSpinner />}

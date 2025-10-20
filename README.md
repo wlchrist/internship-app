@@ -20,6 +20,11 @@ A full-stack application that aggregates Computer Science internship postings fr
 - 🌐 **Remote Work Support**: Clear indication of remote opportunities
 - 🎯 **CS-Focused**: Specifically targets Software Engineering, Data Science, AI/ML, and related fields
 - 🚫 **Smart Filtering**: Excludes non-CS positions (accounting, finance, marketing, etc.)
+- 📱 **SMS Notifications**: Professional SMS delivery via Twilio
+- ⚡ **Instant Alerts**: Real-time SMS for urgent opportunities
+- 🎯 **Personalized Preferences**: Choose notification types and frequency
+- 🔐 **User Credentials**: Users can provide their own Twilio credentials
+- 💰 **Free Tier**: $15 Twilio credit (enough for ~2,000 SMS)
 
 ## 🚀 Quick Start
 
@@ -95,6 +100,13 @@ Create a `.env` file in the `api` directory (optional):
 RAPIDAPI_KEY=your_rapidapi_key_here
 API_HOST=0.0.0.0
 API_PORT=8000
+
+# SMS Notification Configuration (Optional - Users can provide their own)
+# System-wide Twilio credentials (fallback if users don't provide their own)
+# Get free account at: https://www.twilio.com/try-twilio
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_phone_number
 ```
 
 ### Current API Query
@@ -109,11 +121,18 @@ The application uses a comprehensive query to fetch CS internships:
 
 ## 📡 API Endpoints
 
+### Core Endpoints
 - `GET /` - API health check
 - `GET /internships` - Get all internship postings
 - `GET /internships/refresh` - Manually refresh internship data
 - `GET /health` - Health check endpoint
 - `GET /docs` - Interactive API documentation (Swagger UI)
+
+### Notification Endpoints
+- `POST /notifications/subscribe` - Subscribe to email/SMS notifications
+- `POST /notifications/unsubscribe` - Unsubscribe from notifications
+- `GET /notifications/subscribers` - Get subscriber count and info (admin)
+- `POST /notifications/send-test` - Send test notification (admin)
 
 ## 🛠️ Development
 
@@ -363,6 +382,13 @@ This project is licensed under the MIT License.
    - The Fantastic Jobs API has rate limits
    - If you hit limits, the app falls back to mock data
    - Consider upgrading your RapidAPI plan for higher limits
+
+9. **WSL (Windows Subsystem for Linux) Issues**:
+   - **Node.js not found**: Install Node.js in WSL: `curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && sudo apt-get install -y nodejs`
+   - **Permission denied**: Make script executable: `chmod +x start-frontend.sh`
+   - **Port conflicts**: Windows might be using port 3000, try: `npm run dev -- -p 3001`
+   - **Access from Windows**: Use `http://localhost:3000` in Windows browser
+   - **WSL networking**: If localhost doesn't work, try the WSL IP: `http://$(hostname -I | awk '{print $1}'):3000`
 
 ### Getting Help
 

@@ -15,8 +15,8 @@ class InternshipService:
         # Fantastic Jobs API configuration
         self.api_key = os.getenv("RAPIDAPI_KEY", "b55b10072cmshaa3327eadfbb864p1b5030jsnd01b971a8dff")
         self.api_host = "internships-api.p.rapidapi.com"
-        # Comprehensive query for CS internships with advanced filtering
-        self.api_url = "https://internships-api.p.rapidapi.com/active-jb-7d?location_filter=United+States&description_filter=%28intern+OR+internship+OR+co-op%29+AND+%28Python+OR+Java+OR+C%2B%2B+OR+JavaScript+OR+Go+OR+Rust%29+AND+%28develop+OR+build+OR+code+OR+software%29+AND+-senior+-staff+-lead+-principal&offset=0&advanced_title_filter=%28%27Software+Engineering%27+%7C+%27Full-Stack+Developer%27+%7C+%27Front-End+Engineering%27+%7C+%27Back-End+Engineering%27+%7C+%27Site+Reliability%27+%7C+SRE+%7C+%27iOS+Software%27+%7C+%27Android+Software%27+%7C+%27AI+Research%27+%7C+%27AI+Scientist%27+%7C+%27Machine+Learning+Engineer%27+%7C+%27Data+Science%27+%7C+%27Computer+Vision%27+%7C+%27Deep+Learning%27+%7C+NLP+%7C+%27Natural+Language+Processing%27+%7C+%27Offensive+Security%27+%7C+%27AI+Cyber+Security%27+%7C+%27Cloud+Engineer%27+%7C+AWS+%7C+Azure+%7C+DevOps+%7C+Platform+%7C+%27Data+Infrastructure%27+%7C+%27Quantitative+Developer%27+%7C+%27Quantitative+Research%27+%7C+%27Embedded+Software%27+%7C+Autonomy+%7C+Robotics+%7C+Blockchain+%7C+Web3+%7C+AR+%7C+VR+%7C+XR+%7C+%27Growth+Data%27+%7C+Analytics+%7C+%27Information+Security%27+%7C+Risk%29+%26+Intern%3A*"
+        # More inclusive query to get more CS internship results
+        self.api_url = "https://internships-api.p.rapidapi.com/active-jb-7d?location_filter=United+States&description_filter=%28intern+OR+internship+OR+co-op%29+AND+%28software+OR+programming+OR+development+OR+engineering+OR+computer+science+OR+data+science+OR+machine+learning+OR+AI+OR+artificial+intelligence%29&offset=0&advanced_title_filter=%28%27Software+Engineering%27+%7C+%27Full-Stack+Developer%27+%7C+%27Front-End+Engineering%27+%7C+%27Back-End+Engineering%27+%7C+%27Site+Reliability%27+%7C+SRE+%7C+%27iOS+Software%27+%7C+%27Android+Software%27+%7C+%27AI+Research%27+%7C+%27AI+Scientist%27+%7C+%27Machine+Learning+Engineer%27+%7C+%27Data+Science%27+%7C+%27Computer+Vision%27+%7C+%27Deep+Learning%27+%7C+NLP+%7C+%27Natural+Language+Processing%27+%7C+%27Offensive+Security%27+%7C+%27AI+Cyber+Security%27+%7C+%27Cloud+Engineer%27+%7C+AWS+%7C+Azure+%7C+DevOps+%7C+Platform+%7C+%27Data+Infrastructure%27+%7C+%27Quantitative+Developer%27+%7C+%27Quantitative+Research%27+%7C+%27Embedded+Software%27+%7C+Autonomy+%7C+Robotics+%7C+Blockchain+%7C+Web3+%7C+AR+%7C+VR+%7C+XR+%7C+%27Growth+Data%27+%7C+Analytics+%7C+%27Information+Security%27+%7C+Risk%29+%26+Intern%3A*"
         
     async def get_internships(self) -> List[Internship]:
         """Get internships from cache or fetch if needed"""
@@ -35,21 +35,35 @@ class InternshipService:
     async def fetch_and_store_internships(self):
         """Fetch internships from external APIs and store them"""
         try:
-            # Try to fetch from Fantastic Jobs API first
-            real_internships = await self._fetch_from_fantastic_jobs_api()
+            # Try to fetch from Fantastic Jobs API with multiple calls for more results
+            all_internships = []
             
-            if real_internships:
-                self.internships_cache = real_internships
-                print(f"Fetched {len(real_internships)} internships from Fantastic Jobs API")
+            # Make multiple API calls with different offsets to get more results
+            for offset in [0, 10]:  # Get first 20 results (reduced to save API calls)
+                internships = await self._fetch_from_fantastic_jobs_api_with_offset(offset)
+                all_internships.extend(internships)
+                print(f"Fetched {len(internships)} internships from offset {offset}")
+            
+            # Remove duplicates based on job ID
+            unique_internships = []
+            seen_ids = set()
+            for internship in all_internships:
+                if internship.id not in seen_ids:
+                    unique_internships.append(internship)
+                    seen_ids.add(internship.id)
+            
+            if unique_internships:
+                self.internships_cache = unique_internships
+                print(f"Total unique internships fetched: {len(unique_internships)}")
             else:
                 # Fallback to mock data if API fails
                 print("API fetch failed, using mock data")
                 mock_internships = await self._fetch_mock_internships()
                 self.internships_cache = mock_internships
                 print(f"Using {len(mock_internships)} mock internships")
-            
+
             self.last_fetch = datetime.now()
-            
+
         except Exception as e:
             print(f"Error fetching internships: {e}")
             # Keep existing cache if fetch fails
@@ -139,32 +153,48 @@ class InternshipService:
         
         return [Internship(**data) for data in mock_data]
     
-    async def _fetch_from_fantastic_jobs_api(self) -> List[Internship]:
-        """Fetch internships from Fantastic Jobs API"""
+    async def _fetch_from_fantastic_jobs_api_with_offset(self, offset: int) -> List[Internship]:
+        """Fetch internships from Fantastic Jobs API with specific offset"""
         headers = {
             "x-rapidapi-host": self.api_host,
             "x-rapidapi-key": self.api_key
         }
+
+        # Create URL with specific offset
+        base_url = "https://internships-api.p.rapidapi.com/active-jb-7d"
+        params = {
+            "location_filter": "United States",
+            "description_filter": "(intern OR internship OR co-op) AND (software OR programming OR development OR engineering OR computer science OR data science OR machine learning OR AI OR artificial intelligence)",
+            "offset": str(offset),
+            "advanced_title_filter": "('Software Engineering' | 'Full-Stack Developer' | 'Front-End Engineering' | 'Back-End Engineering' | 'Site Reliability' | SRE | 'iOS Software' | 'Android Software' | 'AI Research' | 'AI Scientist' | 'Machine Learning Engineer' | 'Data Science' | 'Computer Vision' | 'Deep Learning' | NLP | 'Natural Language Processing' | 'Offensive Security' | 'AI Cyber Security' | 'Cloud Engineer' | AWS | Azure | DevOps | Platform | 'Data Infrastructure' | 'Quantitative Developer' | 'Quantitative Research' | 'Embedded Software' | Autonomy | Robotics | Blockchain | Web3 | AR | VR | XR | 'Growth Data' | Analytics | 'Information Security' | Risk) & Intern:*"
+        }
         
+        # Build URL with parameters
+        url = base_url + "?" + "&".join([f"{k}={v}" for k, v in params.items()])
+
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                print(f"Fetching from Fantastic Jobs API: {self.api_url}")
-                response = await client.get(self.api_url, headers=headers)
+                print(f"Fetching from Fantastic Jobs API (offset {offset}): {url[:100]}...")
+                response = await client.get(url, headers=headers)
                 response.raise_for_status()
-                
+
                 data = response.json()
-                print(f"API Response: {json.dumps(data, indent=2)[:500]}...")  # Log first 500 chars
-                
+                print(f"API Response for offset {offset}: {len(data) if isinstance(data, list) else 'Not a list'} items")
+
                 # Transform API response to our Internship model
                 internships = self._transform_api_response(data)
                 return internships
-                
+
         except httpx.HTTPError as e:
-            print(f"HTTP error fetching from Fantastic Jobs API: {e}")
+            print(f"HTTP error fetching from Fantastic Jobs API (offset {offset}): {e}")
             return []
         except Exception as e:
-            print(f"Error fetching from Fantastic Jobs API: {e}")
+            print(f"Error fetching from Fantastic Jobs API (offset {offset}): {e}")
             return []
+
+    async def _fetch_from_fantastic_jobs_api(self) -> List[Internship]:
+        """Fetch internships from Fantastic Jobs API (legacy method)"""
+        return await self._fetch_from_fantastic_jobs_api_with_offset(0)
     
     def _transform_api_response(self, api_data: Any) -> List[Internship]:
         """Transform Fantastic Jobs API response to our Internship model"""
@@ -194,13 +224,14 @@ class InternshipService:
                 if len(description) > 500:
                     description = description[:500] + "..."
 
-                # Since the API query already filters for CS internships, we should accept most results
-                # Only exclude obvious non-CS positions
+                # Since the API query already filters for CS internships, accept most results
+                # Only exclude obvious non-CS positions (be more permissive)
                 exclude_keywords = [
                     'accountant', 'accounting', 'finance', 'marketing', 'sales', 'hr',
                     'human resources', 'business analyst', 'management consultant',
                     'mechanical engineer', 'civil engineer', 'electrical engineer', 
-                    'chemical engineer', 'biomedical engineer', 'nurse', 'teacher'
+                    'chemical engineer', 'biomedical engineer', 'nurse', 'teacher',
+                    'legal', 'lawyer', 'paralegal', 'medical', 'healthcare', 'pharmacy'
                 ]
 
                 title_lower = title.lower()
@@ -213,8 +244,8 @@ class InternshipService:
                         print(f"Job {i+1}: '{title}' - EXCLUDED (non-CS)")
                     continue
 
-                # Debug: print filtering decision
-                if i < 3:  # Only for first 3 jobs
+                # Accept all other results since API query already filters for CS
+                if i < 3:  # Debug for first 3 jobs
                     print(f"Job {i+1}: '{title}' - ACCEPTED (CS-related)")
                 
                 # Handle salary data
