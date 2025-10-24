@@ -224,14 +224,22 @@ class InternshipService:
                 if len(description) > 500:
                     description = description[:500] + "..."
 
-                # Since the API query already filters for CS internships, accept most results
-                # Only exclude obvious non-CS positions (be more permissive)
+                # Define keywords for exclusions and inclusions
                 exclude_keywords = [
                     'accountant', 'accounting', 'finance', 'marketing', 'sales', 'hr',
                     'human resources', 'business analyst', 'management consultant',
                     'mechanical engineer', 'civil engineer', 'electrical engineer', 
                     'chemical engineer', 'biomedical engineer', 'nurse', 'teacher',
-                    'legal', 'lawyer', 'paralegal', 'medical', 'healthcare', 'pharmacy'
+                    'legal', 'lawyer', 'paralegal', 'medical', 'healthcare', 'pharmacy',
+                    'senior manager', 'lead', 'principal', 'staff', 'director', 'vp',
+                    'vice president', 'head of', 'chief', 'executive', 'sr.'
+                ]
+                
+                # Keywords that indicate internship/entry-level positions
+                internship_keywords = [
+                    'intern', 'internship', 'co-op', 'coop', 'entry level', 'entry-level',
+                    'new grad', 'recent grad', 'junior', 'jr.', 'associate', 'trainee',
+                    'summer intern', 'winter intern', 'fall intern', 'spring intern'
                 ]
 
                 title_lower = title.lower()
@@ -241,12 +249,19 @@ class InternshipService:
                 is_excluded = any(keyword in title_lower or keyword in desc_lower for keyword in exclude_keywords)
                 if is_excluded:
                     if i < 3:  # Debug for first 3 jobs
-                        print(f"Job {i+1}: '{title}' - EXCLUDED (non-CS)")
+                        print(f"Job {i+1}: '{title}' - EXCLUDED (non-CS or senior position)")
                     continue
 
-                # Accept all other results since API query already filters for CS
+                # Check if it's actually an internship/entry-level position
+                is_internship = any(keyword in title_lower for keyword in internship_keywords)
+                if not is_internship:
+                    if i < 3:  # Debug for first 3 jobs
+                        print(f"Job {i+1}: '{title}' - EXCLUDED (not an internship)")
+                    continue
+
+                # Accept only CS-related internships
                 if i < 3:  # Debug for first 3 jobs
-                    print(f"Job {i+1}: '{title}' - ACCEPTED (CS-related)")
+                    print(f"Job {i+1}: '{title}' - ACCEPTED (CS internship)")
                 
                 # Handle salary data
                 salary_raw = job.get('salary_raw', {})

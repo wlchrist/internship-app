@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import InternshipCard from './components/InternshipCard';
 import LoadingSpinner from './components/LoadingSpinner';
 import NotificationSubscription from './components/NotificationSubscription';
+import FilterPanel from './components/FilterPanel';
 
 interface Internship {
   id: string;
@@ -21,10 +22,27 @@ interface Internship {
   job_type?: string;
 }
 
+interface FilterState {
+  searchTerm: string;
+  location: string;
+  remoteOnly: boolean;
+  salaryRange: string;
+  company: string;
+  jobType: string;
+}
+
 export default function Home() {
   const [internships, setInternships] = useState<Internship[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState>({
+    searchTerm: '',
+    location: '',
+    remoteOnly: false,
+    salaryRange: '',
+    company: '',
+    jobType: '',
+  });
 
   const fetchInternships = async () => {
     try {
@@ -58,6 +76,71 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  // Filter internships based on current filters
+  const filteredInternships = useMemo(() => {
+    return internships.filter(internship => {
+      // Search term filter
+      if (filters.searchTerm) {
+        const searchLower = filters.searchTerm.toLowerCase();
+        const matchesSearch = 
+          internship.title.toLowerCase().includes(searchLower) ||
+          internship.description.toLowerCase().includes(searchLower) ||
+          internship.company.toLowerCase().includes(searchLower) ||
+          internship.location.toLowerCase().includes(searchLower);
+        if (!matchesSearch) return false;
+      }
+
+      // Location filter
+      if (filters.location && internship.location !== filters.location) {
+        return false;
+      }
+
+      // Company filter
+      if (filters.company && internship.company !== filters.company) {
+        return false;
+      }
+
+      // Remote only filter
+      if (filters.remoteOnly && !internship.remote) {
+        return false;
+      }
+
+      // Salary range filter
+      if (filters.salaryRange) {
+        const salary = internship.salary?.toLowerCase() || '';
+        switch (filters.salaryRange) {
+          case 'paid':
+            if (!salary.includes('paid') && !salary.includes('$') && !salary.includes('hourly') && !salary.includes('competitive')) {
+              return false;
+            }
+            break;
+          case 'unpaid':
+            if (!salary.includes('unpaid') && !salary.includes('volunteer')) {
+              return false;
+            }
+            break;
+          case 'competitive':
+            if (!salary.includes('competitive')) {
+              return false;
+            }
+            break;
+          case 'hourly':
+            if (!salary.includes('hourly') && !salary.includes('$')) {
+              return false;
+            }
+            break;
+        }
+      }
+
+      // Job type filter
+      if (filters.jobType && internship.job_type !== filters.jobType) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [internships, filters]);
 
   useEffect(() => {
     fetchInternships();
@@ -96,7 +179,7 @@ export default function Home() {
             
             {!loading && internships.length > 0 && (
               <span className="text-sm text-gray-500">
-                {internships.length} internships available
+                {filteredInternships.length} of {internships.length} internships
               </span>
             )}
           </div>
@@ -129,6 +212,15 @@ export default function Home() {
           </div>
         )}
 
+        {/* Filter Panel */}
+        {!loading && internships.length > 0 && (
+          <FilterPanel 
+            filters={filters}
+            onFiltersChange={setFilters}
+            internships={internships}
+          />
+        )}
+
         {/* Notification Subscription Section */}
         <div className="mb-12">
           <NotificationSubscription />
@@ -138,9 +230,9 @@ export default function Home() {
         {loading && internships.length === 0 && <LoadingSpinner />}
 
         {/* Internships Grid */}
-        {!loading && internships.length > 0 && (
+        {!loading && filteredInternships.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {internships.map((internship) => (
+            {filteredInternships.map((internship) => (
               <InternshipCard key={internship.id} internship={internship} />
             ))}
           </div>
@@ -161,6 +253,32 @@ export default function Home() {
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
             >
               Refresh Data
+            </button>
+          </div>
+        )}
+
+        {/* No Results State */}
+        {!loading && internships.length > 0 && filteredInternships.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">🔍</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No internships match your filters
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Try adjusting your search criteria or clearing the filters.
+            </p>
+            <button
+              onClick={() => setFilters({
+                searchTerm: '',
+                location: '',
+                remoteOnly: false,
+                salaryRange: '',
+                company: '',
+                jobType: '',
+              })}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
+            >
+              Clear All Filters
             </button>
           </div>
         )}

@@ -14,6 +14,7 @@ interface NotificationFormData {
 }
 
 const NotificationSubscription: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [formData, setFormData] = useState<NotificationFormData>({
     email: '',
     phone: '',
@@ -117,17 +118,43 @@ const NotificationSubscription: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          📱 Get SMS Notifications for New Internships
-        </h2>
-        <p className="text-gray-600">
-          Stay updated with the latest CS internship opportunities via SMS
-        </p>
+    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg border border-gray-200">
+      {/* Collapsible Header */}
+      <div 
+        className="flex justify-between items-center p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">📱</span>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">
+              Get SMS Notifications for New Internships
+            </h2>
+            <p className="text-sm text-gray-600">
+              Stay updated with the latest CS internship opportunities via SMS
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {!isExpanded && (
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+              Click to subscribe
+            </span>
+          )}
+          <span className="text-sm text-gray-500">
+            {isExpanded ? 'Hide' : 'Show'} Form
+          </span>
+          <span className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+            ▼
+          </span>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Collapsible Content */}
+      {isExpanded && (
+        <div className="px-6 pb-6 border-t border-gray-200">
+
+          <form onSubmit={handleSubmit} className="space-y-6 pt-6">
         {/* Email Field (for identification) */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -292,6 +319,8 @@ const NotificationSubscription: React.FC = () => {
           </p>
         </div>
       </div>
+        </div>
+      )}
     </div>
   );
 };
