@@ -1,8 +1,8 @@
-# 🎯 Internship Aggregator
+# Internship Aggregator
 
 A full-stack application that aggregates Computer Science internship postings from the Fantastic Jobs API and presents them in a clean, modern web interface. The application fetches real internship data every 24 hours and displays them in real-time.
 
-## 🏗️ Architecture
+## Architecture
 
 - **Frontend**: Next.js 15.5.4 with React 19.1.0, TypeScript, and Tailwind CSS
 - **Backend**: FastAPI with Python 3.13
@@ -10,23 +10,23 @@ A full-stack application that aggregates Computer Science internship postings fr
 - **Auto-refresh**: Data refreshes every 24 hours automatically
 - **Filtering**: Focuses on Computer Science internships (Software Engineering, Data Science, AI/ML, etc.)
 
-## ✨ Features
+## Features
 
-- 📋 **Real-time CS Internship Listings**: View current Computer Science internship opportunities
-- 🔄 **Auto-refresh**: Data refreshes every 24 hours automatically
-- 🎨 **Modern UI**: Clean, responsive design with Tailwind CSS
-- 📱 **Mobile-friendly**: Responsive design that works on all devices
-- 🔍 **Detailed Information**: Company, location, salary, requirements, and more
-- 🌐 **Remote Work Support**: Clear indication of remote opportunities
-- 🎯 **CS-Focused**: Specifically targets Software Engineering, Data Science, AI/ML, and related fields
-- 🚫 **Smart Filtering**: Excludes non-CS positions (accounting, finance, marketing, etc.)
-- 📱 **SMS Notifications**: Professional SMS delivery via Twilio
-- ⚡ **Instant Alerts**: Real-time SMS for urgent opportunities
-- 🎯 **Personalized Preferences**: Choose notification types and frequency
-- 🔐 **User Credentials**: Users can provide their own Twilio credentials
-- 💰 **Free Tier**: $15 Twilio credit (enough for ~2,000 SMS)
+- **Real-time CS Internship Listings**: View current Computer Science internship opportunities
+- **Auto-refresh**: Data refreshes every 24 hours automatically
+- **Modern UI**: Clean, responsive design with Tailwind CSS
+- **Mobile-friendly**: Responsive design that works on all devices
+- **Detailed Information**: Company, location, salary, requirements, and more
+- **Remote Work Support**: Clear indication of remote opportunities
+- **CS-Focused**: Specifically targets Software Engineering, Data Science, AI/ML, and related fields
+- **Smart Filtering**: Excludes non-CS positions (accounting, finance, marketing, etc.)
+- **SMS Notifications**: Professional SMS delivery via Twilio
+- **Instant Alerts**: Real-time SMS for urgent opportunities
+- **Personalized Preferences**: Choose notification types and frequency
+- **User Credentials**: Users can provide their own Twilio credentials
+- **Free Tier**: $15 Twilio credit (enough for ~2,000 SMS)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -87,7 +87,7 @@ The startup scripts will automatically handle virtual environment creation and d
    npm run dev
    ```
 
-## 🔧 API Configuration
+## API Configuration
 
 The application uses the Fantastic Jobs API via RapidAPI. The API key is already configured, but you can customize it:
 
@@ -119,7 +119,7 @@ The application uses a comprehensive query to fetch CS internships:
 - **Exclusions**: Senior, staff, lead, principal positions
 - **Focus**: Internship and co-op positions only
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Core Endpoints
 - `GET /` - API health check
@@ -134,11 +134,11 @@ The application uses a comprehensive query to fetch CS internships:
 - `GET /notifications/subscribers` - Get subscriber count and info (admin)
 - `POST /notifications/send-test` - Send test notification (admin)
 
-## 🛠️ Development
+## Development
 
 ### Essential Files for Contributors
 
-#### 🎯 **Backend Files (FastAPI)**
+#### Backend Files (FastAPI)
 
 **Core Application Files:**
 - **`api/main.py`** - Main FastAPI application with all API endpoints
@@ -151,45 +151,49 @@ The application uses a comprehensive query to fetch CS internships:
 - `GET /internships/refresh` - Manually refreshes data
 - `GET /health` - Health check
 
-#### 🎨 **Frontend Files (Next.js)**
+#### Frontend Files (Next.js)
 
 **Main Application Files:**
 - **`web/internship-app-frontend/src/app/page.tsx`** - Main homepage component
 - **`web/internship-app-frontend/src/app/layout.tsx`** - Root layout and metadata
 - **`web/internship-app-frontend/src/app/components/InternshipCard.tsx`** - Individual internship card component
 - **`web/internship-app-frontend/src/app/components/LoadingSpinner.tsx`** - Loading spinner component
+- **`web/internship-app-frontend/src/app/components/FilterPanel.tsx`** - Filter panel component
+- **`web/internship-app-frontend/src/app/components/NotificationSubscription.tsx`** - SMS notification subscription component
 
 **Configuration Files:**
 - **`web/internship-app-frontend/package.json`** - Node.js dependencies and scripts
 - **`web/internship-app-frontend/next.config.ts`** - Next.js configuration
 - **`web/internship-app-frontend/tsconfig.json`** - TypeScript configuration
 
-#### 📁 **File Structure Summary**
+#### File Structure Summary
 
 ```
 internship-app/
 ├── api/
-│   ├── main.py              # 🎯 Main API endpoints
-│   ├── models.py           # 🎯 Data models
-│   ├── services.py         # 🎯 Business logic
+│   ├── main.py              # Main API endpoints
+│   ├── models.py           # Data models
+│   ├── services.py         # Business logic
 │   ├── requirements.txt     # Dependencies
 │   └── fastapi/            # Python virtual environment (auto-created)
 ├── web/internship-app-frontend/
 │   ├── src/app/
-│   │   ├── page.tsx        # 🎯 Main page
+│   │   ├── page.tsx        # Main page
 │   │   ├── layout.tsx      # Root layout
 │   │   └── components/
-│   │       ├── InternshipCard.tsx    # 🎯 Internship display
+│   │       ├── InternshipCard.tsx    # Internship display
+│   │       ├── FilterPanel.tsx       # Filter interface
+│   │       ├── NotificationSubscription.tsx  # SMS subscription
 │   │       └── LoadingSpinner.tsx   # Loading component
 │   ├── package.json        # Node.js dependencies
 │   └── next.config.ts      # Next.js config
-├── start-backend.sh        # 🚀 Backend startup script
-├── start-frontend.sh       # 🚀 Frontend startup script
+├── start-backend.sh        # Backend startup script
+├── start-frontend.sh       # Frontend startup script
 ├── .gitignore             # Git ignore rules
 └── README.md              # This file
 ```
 
-#### 🚀 **Quick Reference for Common Tasks**
+#### Quick Reference for Common Tasks
 
 | Task | File to Edit |
 |------|-------------|
@@ -201,7 +205,7 @@ internship-app/
 | Change styling | Any `.tsx` file (Tailwind CSS) |
 | Add dependencies | `api/requirements.txt` or `web/.../package.json` |
 
-#### 💡 **Development Tips**
+#### Development Tips
 
 1. **Start with `api/main.py`** for backend changes
 2. **Start with `web/.../src/app/page.tsx`** for frontend changes
@@ -242,7 +246,7 @@ async def _fetch_from_real_api(self, api_url: str, headers: Dict[str, str] = Non
         return response.json()
 ```
 
-## 📊 Data Model
+## Data Model
 
 Each internship posting includes:
 
@@ -264,7 +268,7 @@ interface Internship {
 }
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -294,7 +298,7 @@ app.add_middleware(
 )
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Backend Deployment
 
@@ -331,7 +335,7 @@ app.add_middleware(
    - **AWS S3**: Upload build files
    - **DigitalOcean**: Use App Platform
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
@@ -339,11 +343,11 @@ app.add_middleware(
 4. Push to branch: `git push origin feature-name`
 5. Submit a pull request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License.
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -396,7 +400,7 @@ This project is licensed under the MIT License.
 - Review the browser console for frontend errors
 - Check the terminal output for backend errors
 
-## 🌐 Access Your Application
+## Access Your Application
 
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8000
