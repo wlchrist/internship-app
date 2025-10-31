@@ -63,7 +63,7 @@ export default function FilterPanel({ filters, onFiltersChange, internships }: F
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg">🔍</span>
+          <span className="text-lg">Search</span>
           <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
           {hasActiveFilters && (
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">

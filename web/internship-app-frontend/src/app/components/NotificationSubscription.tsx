@@ -47,7 +47,7 @@ const NotificationSubscription: React.FC = () => {
       const result = await response.json();
 
       if (response.ok) {
-        setMessage(`✅ Successfully subscribed! You'll receive SMS notifications at ${formData.phone}`);
+        setMessage(`Successfully subscribed! You'll receive SMS notifications at ${formData.phone}`);
         setMessageType('success');
         setFormData({
           email: '',
@@ -60,11 +60,11 @@ const NotificationSubscription: React.FC = () => {
           twilio_phone_number: '',
         });
       } else {
-        setMessage(`❌ Error: ${result.detail}`);
+        setMessage(`Error: ${result.detail}`);
         setMessageType('error');
       }
     } catch (error) {
-      setMessage('❌ Network error. Please try again.');
+      setMessage('Network error. Please try again.');
       setMessageType('error');
     } finally {
       setIsSubmitting(false);
@@ -73,7 +73,7 @@ const NotificationSubscription: React.FC = () => {
 
   const handleUnsubscribe = async () => {
     if (!formData.email) {
-      setMessage('❌ Please enter your email address to unsubscribe');
+      setMessage('Please enter your email address to unsubscribe');
       setMessageType('error');
       return;
     }
@@ -93,7 +93,7 @@ const NotificationSubscription: React.FC = () => {
       const result = await response.json();
 
       if (response.ok) {
-        setMessage('✅ Successfully unsubscribed from notifications');
+        setMessage('Successfully unsubscribed from notifications');
         setMessageType('success');
         setFormData({
           email: '',
@@ -106,11 +106,11 @@ const NotificationSubscription: React.FC = () => {
           twilio_phone_number: '',
         });
       } else {
-        setMessage(`❌ Error: ${result.detail}`);
+        setMessage(`Error: ${result.detail}`);
         setMessageType('error');
       }
     } catch (error) {
-      setMessage('❌ Network error. Please try again.');
+      setMessage('Network error. Please try again.');
       setMessageType('error');
     } finally {
       setIsSubmitting(false);
@@ -125,7 +125,6 @@ const NotificationSubscription: React.FC = () => {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl">📱</span>
           <div>
             <h2 className="text-xl font-bold text-gray-900">
               Get SMS Notifications for New Internships
@@ -251,7 +250,7 @@ const NotificationSubscription: React.FC = () => {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="daily_digest" className="text-sm font-medium text-gray-700">
-              📅 Daily SMS digest with new internships
+              Daily SMS digest with new internships
             </label>
           </div>
 
@@ -264,7 +263,7 @@ const NotificationSubscription: React.FC = () => {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="instant_alerts" className="text-sm font-medium text-gray-700">
-              ⚡ Instant SMS alerts for urgent opportunities
+              Instant SMS alerts for urgent opportunities
             </label>
           </div>
         </div>
@@ -303,7 +302,7 @@ const NotificationSubscription: React.FC = () => {
 
       {/* Info Section */}
       <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-        <h4 className="font-medium text-blue-900 mb-2">ℹ️ How SMS notifications work:</h4>
+        <h4 className="font-medium text-blue-900 mb-2">How SMS notifications work:</h4>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• <strong>Your Twilio Account:</strong> Use your own Twilio credentials (recommended)</li>
           <li>• <strong>System Defaults:</strong> Leave credentials blank to use system defaults</li>
@@ -315,7 +314,7 @@ const NotificationSubscription: React.FC = () => {
         
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
           <p className="text-sm text-yellow-800">
-            <strong>🔒 Security:</strong> Your Twilio credentials are stored securely and only used for your SMS notifications.
+            <strong>Security:</strong> Your Twilio credentials are stored securely and only used for your SMS notifications.
           </p>
         </div>
       </div>

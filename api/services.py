@@ -48,7 +48,7 @@ class InternshipService:
                 print(f"\nFetching batch at offset {offset}...")
                 internships = await self._fetch_from_fantastic_jobs_api_with_offset(offset)
                 all_internships.extend(internships)
-                print(f"✓ Fetched {len(internships)} internships from offset {offset}")
+                print(f"Fetched {len(internships)} internships from offset {offset}")
                 
                 # Add small delay between API calls to be respectful
                 if offset < 50:
@@ -64,32 +64,32 @@ class InternshipService:
             
             if unique_internships:
                 self.internships_cache = unique_internships
-                print(f"\n✓ Successfully fetched {len(unique_internships)} unique internships from Fantastic Jobs API")
-                print(f"✓ Companies: {', '.join(set(internship.company for internship in unique_internships[:10]))}")
+                print(f"\nSuccessfully fetched {len(unique_internships)} unique internships from Fantastic Jobs API")
+                print(f"Companies: {', '.join(set(internship.company for internship in unique_internships[:10]))}")
             else:
                 # No internships found from API - log warning but don't use mock data
-                print(f"\n⚠ WARNING: No internships found from Fantastic Jobs API")
-                print("⚠ Possible reasons:")
+                print(f"\nWARNING: No internships found from Fantastic Jobs API")
+                print("Possible reasons:")
                 print("  - API rate limit exceeded")
                 print("  - API key invalid or expired")
                 print("  - Network connection issue")
                 print("  - API endpoint changed")
-                print(f"\n⚠ Keeping existing cache ({len(self.internships_cache)} internships)")
+                print(f"\nKeeping existing cache ({len(self.internships_cache)} internships)")
                 # Don't fallback to mock data - use empty cache or existing cache
                 if not self.internships_cache:
-                    print("⚠ No cached data available - will return empty list")
+                    print("No cached data available - will return empty list")
                     self.internships_cache = []
 
             self.last_fetch = datetime.now()
             print("=" * 60)
 
         except Exception as e:
-            print(f"\n❌ ERROR fetching internships: {e}")
+            print(f"\nERROR fetching internships: {e}")
             import traceback
             traceback.print_exc()
             # Keep existing cache if fetch fails
             if not self.internships_cache:
-                print("⚠ No cached data available - will return empty list")
+                print("No cached data available - will return empty list")
                 self.internships_cache = []
     
     async def _fetch_mock_internships(self) -> List[Internship]:
@@ -196,16 +196,16 @@ class InternshipService:
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                print(f"  → API Request: {base_url}?offset={offset}")
-                print(f"  → Headers: x-rapidapi-host={self.api_host}, x-rapidapi-key={'*' * 10 + self.api_key[-10:]}")
+                print(f"  API Request: {base_url}?offset={offset}")
+                print(f"  Headers: x-rapidapi-host={self.api_host}, x-rapidapi-key={'*' * 10 + self.api_key[-10:]}")
                 
                 response = await client.get(url, headers=headers)
                 
                 # Log response status
-                print(f"  → Response Status: {response.status_code}")
+                print(f"  Response Status: {response.status_code}")
                 
                 if response.status_code != 200:
-                    print(f"  → Response Body: {response.text[:200]}")
+                    print(f"  Response Body: {response.text[:200]}")
                 
                 response.raise_for_status()
 
@@ -221,29 +221,29 @@ class InternshipService:
                     elif 'jobs' in data:
                         data = data['jobs']
                     else:
-                        print(f"  ⚠ Unexpected response format: {list(data.keys())[:5]}")
+                        print(f"  WARNING: Unexpected response format: {list(data.keys())[:5]}")
                         data = []
                 
                 if isinstance(data, list):
-                    print(f"  → Received {len(data)} raw job listings")
+                    print(f"  Received {len(data)} raw job listings")
                     # Transform API response to our Internship model
                     internships = self._transform_api_response(data)
-                    print(f"  → After filtering: {len(internships)} CS internships")
+                    print(f"  After filtering: {len(internships)} CS internships")
                     return internships
                 else:
-                    print(f"  ⚠ Unexpected response type: {type(data)}")
-                    print(f"  ⚠ Response sample: {str(data)[:200]}")
+                    print(f"  WARNING: Unexpected response type: {type(data)}")
+                    print(f"  WARNING: Response sample: {str(data)[:200]}")
                     return []
 
         except httpx.HTTPStatusError as e:
-            print(f"  ❌ HTTP Status Error (offset {offset}): {e.response.status_code}")
-            print(f"  → Response: {e.response.text[:200] if hasattr(e.response, 'text') else 'No response body'}")
+            print(f"  ERROR: HTTP Status Error (offset {offset}): {e.response.status_code}")
+            print(f"  Response: {e.response.text[:200] if hasattr(e.response, 'text') else 'No response body'}")
             return []
         except httpx.HTTPError as e:
-            print(f"  ❌ HTTP Error (offset {offset}): {e}")
+            print(f"  ERROR: HTTP Error (offset {offset}): {e}")
             return []
         except Exception as e:
-            print(f"  ❌ Error fetching from Fantastic Jobs API (offset {offset}): {e}")
+            print(f"  ERROR: Error fetching from Fantastic Jobs API (offset {offset}): {e}")
             import traceback
             traceback.print_exc()
             return []
@@ -347,7 +347,7 @@ class InternshipService:
                 if is_excluded:
                     stats['excluded_non_cs'] += 1
                     if i < 5:  # Show first 5 excluded
-                        print(f"  ❌ Job {i+1}: '{title[:60]}...' - EXCLUDED (non-CS or senior position in title)")
+                        print(f"  EXCLUDED Job {i+1}: '{title[:60]}...' - (non-CS or senior position in title)")
                     continue
 
                 # Check if it's actually an internship/entry-level position
@@ -359,7 +359,7 @@ class InternshipService:
                 if not is_internship:
                     stats['excluded_not_internship'] += 1
                     if i < 5:  # Show first 5 excluded
-                        print(f"  ❌ Job {i+1}: '{title[:60]}...' - EXCLUDED (not an internship)")
+                        print(f"  EXCLUDED Job {i+1}: '{title[:60]}...' - (not an internship)")
                     continue
 
                 # POSITIVE CHECK: Must contain at least one CS-related keyword
@@ -367,13 +367,13 @@ class InternshipService:
                 if not has_cs_keyword:
                     stats['excluded_no_cs_keyword'] += 1
                     if i < 5:  # Show first 5 excluded
-                        print(f"  ❌ Job {i+1}: '{title[:60]}...' - EXCLUDED (no CS-related keywords)")
+                        print(f"  EXCLUDED Job {i+1}: '{title[:60]}...' - (no CS-related keywords)")
                     continue
 
                 # All checks passed - this is a CS internship
                 stats['accepted'] += 1
                 if i < 5 or stats['accepted'] <= 5:  # Show first 5 accepted
-                    print(f"  ✅ Job {i+1}: '{title[:60]}...' - ACCEPTED (CS internship)")
+                    print(f"  ACCEPTED Job {i+1}: '{title[:60]}...' - (CS internship)")
                 
                 # Handle salary data
                 salary_raw = job.get('salary_raw', {})
@@ -428,13 +428,13 @@ class InternshipService:
                 continue
         
         # Print statistics summary
-        print(f"\n  📊 Filtering Statistics:")
+        print(f"\n  Filtering Statistics:")
         print(f"     Total jobs processed: {stats['total_jobs']}")
-        print(f"     ✅ Accepted (CS internships): {stats['accepted']}")
-        print(f"     ❌ Excluded - Non-CS/Senior: {stats['excluded_non_cs']}")
-        print(f"     ❌ Excluded - Not internship: {stats['excluded_not_internship']}")
-        print(f"     ❌ Excluded - No CS keywords: {stats['excluded_no_cs_keyword']}")
-        print(f"     📈 Acceptance rate: {(stats['accepted']/stats['total_jobs']*100):.1f}%" if stats['total_jobs'] > 0 else "     📈 Acceptance rate: 0%")
+        print(f"     Accepted (CS internships): {stats['accepted']}")
+        print(f"     Excluded - Non-CS/Senior: {stats['excluded_non_cs']}")
+        print(f"     Excluded - Not internship: {stats['excluded_not_internship']}")
+        print(f"     Excluded - No CS keywords: {stats['excluded_no_cs_keyword']}")
+        print(f"     Acceptance rate: {(stats['accepted']/stats['total_jobs']*100):.1f}%" if stats['total_jobs'] > 0 else "     Acceptance rate: 0%")
         
         return internships
     

@@ -286,7 +286,7 @@ export default function Home() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              🎯 Internship Aggregator
+              Internship Aggregator
             </h1>
             <p className="text-lg text-gray-600">
               Create an account or sign in to get started
@@ -323,7 +323,7 @@ export default function Home() {
           <div className="flex justify-between items-center mb-4">
             <div></div>
             <h1 className="text-4xl font-bold text-gray-900">
-              🎯 Internship Aggregator
+              Internship Aggregator
             </h1>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">
@@ -383,7 +383,7 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  🔄 Refresh Data
+                  Refresh Data
                 </>
               )}
             </button>
@@ -401,7 +401,7 @@ export default function Home() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <div className="flex">
               <div className="flex-shrink-0">
-                <span className="text-red-400">⚠️</span>
+                <span className="text-red-400">!</span>
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">
@@ -472,7 +472,6 @@ export default function Home() {
         {/* Empty Saved Jobs State */}
         {!loading && viewMode === 'saved' && savedJobs.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">💾</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No saved jobs yet
             </h3>
@@ -491,7 +490,6 @@ export default function Home() {
         {/* Empty State */}
         {!loading && internships.length === 0 && !error && (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">📋</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No internships found
             </h3>
@@ -510,7 +508,6 @@ export default function Home() {
         {/* No Results State */}
         {!loading && internships.length > 0 && filteredInternships.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🔍</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No internships match your filters
             </h3>

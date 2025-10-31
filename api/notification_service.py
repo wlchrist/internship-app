@@ -299,7 +299,7 @@ class NotificationService:
         </head>
         <body>
             <div class="header">
-                <h1>🎯 Daily CS Internship Digest</h1>
+                <h1>Daily CS Internship Digest</h1>
                 <p>Found {len(internships)} new Computer Science internships for you!</p>
             </div>
         """
@@ -308,18 +308,18 @@ class NotificationService:
             html += f"""
             <div class="internship">
                 <div class="title">{internship.title}</div>
-                <div class="company">🏢 {internship.company}</div>
-                <div class="location">📍 {internship.location}</div>
+                <div class="company">{internship.company}</div>
+                <div class="location">Location: {internship.location}</div>
                 <div class="description">{internship.description[:200]}...</div>
-                {f'<div class="salary">💰 {internship.salary}</div>' if internship.salary else ''}
+                {f'<div class="salary">Salary: {internship.salary}</div>' if internship.salary else ''}
                 <a href="{internship.source_url}" class="link">View Job →</a>
             </div>
             """
         
         html += """
             <div style="margin-top: 30px; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
-                <p>💡 <strong>Tip:</strong> Visit our website to see all internships and set up instant alerts!</p>
-                <p>📧 <strong>Unsubscribe:</strong> Reply to this email with "UNSUBSCRIBE"</p>
+                <p><strong>Tip:</strong> Visit our website to see all internships and set up instant alerts!</p>
+                <p><strong>Unsubscribe:</strong> Reply to this email with "UNSUBSCRIBE"</p>
             </div>
         </body>
         </html>
@@ -329,13 +329,13 @@ class NotificationService:
     
     def _create_digest_sms(self, internships: List[Internship]) -> str:
         """Create SMS content for daily digest"""
-        message = f"🎯 CS Internship Digest: {len(internships)} new opportunities!\n\n"
+        message = f"CS Internship Digest: {len(internships)} new opportunities!\n\n"
         
         for i, internship in enumerate(internships[:3], 1):  # Limit to top 3 for SMS
             message += f"{i}. {internship.title} @ {internship.company}\n"
-            message += f"   📍 {internship.location}\n"
+            message += f"   Location: {internship.location}\n"
             if internship.salary:
-                message += f"   💰 {internship.salary}\n"
+                message += f"   Salary: {internship.salary}\n"
             message += "\n"
         
         if len(internships) > 3:
@@ -362,7 +362,7 @@ class NotificationService:
         </head>
         <body>
             <div class="header">
-                <h1>🚨 New CS Internships Available!</h1>
+                <h1>New CS Internships Available!</h1>
                 <p>{len(internships)} fresh opportunities just posted!</p>
             </div>
         """
@@ -371,18 +371,18 @@ class NotificationService:
             html += f"""
             <div class="internship">
                 <div class="title">{internship.title}</div>
-                <div class="company">🏢 {internship.company}</div>
-                <div class="location">📍 {internship.location}</div>
+                <div class="company">{internship.company}</div>
+                <div class="location">Location: {internship.location}</div>
                 <div class="description">{internship.description[:200]}...</div>
-                {f'<div class="salary">💰 {internship.salary}</div>' if internship.salary else ''}
+                {f'<div class="salary">Salary: {internship.salary}</div>' if internship.salary else ''}
                 <a href="{internship.source_url}" class="link">Apply Now →</a>
             </div>
             """
         
         html += """
             <div style="margin-top: 30px; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
-                <p>⚡ <strong>Act Fast:</strong> These internships are fresh and competition is high!</p>
-                <p>📧 <strong>Unsubscribe:</strong> Reply to this email with "UNSUBSCRIBE"</p>
+                <p><strong>Act Fast:</strong> These internships are fresh and competition is high!</p>
+                <p><strong>Unsubscribe:</strong> Reply to this email with "UNSUBSCRIBE"</p>
             </div>
         </body>
         </html>
@@ -392,11 +392,11 @@ class NotificationService:
     
     def _create_alert_sms(self, internships: List[Internship]) -> str:
         """Create SMS content for instant alerts"""
-        message = f"🚨 NEW CS INTERNSHIPS! {len(internships)} just posted:\n\n"
+        message = f"NEW CS INTERNSHIPS! {len(internships)} just posted:\n\n"
         
         for i, internship in enumerate(internships[:2], 1):  # Limit to top 2 for SMS
             message += f"{i}. {internship.title} @ {internship.company}\n"
-            message += f"   📍 {internship.location}\n\n"
+            message += f"   Location: {internship.location}\n\n"
         
         if len(internships) > 2:
             message += f"...and {len(internships) - 2} more! Apply fast!"

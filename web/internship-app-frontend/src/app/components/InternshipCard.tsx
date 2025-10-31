@@ -49,7 +49,7 @@ export default function InternshipCard({ internship, isSaved = false, onSave, on
       
       <div className="mb-4">
         <p className="text-gray-600 mb-2">
-          📍 {internship.location}
+          Location: {internship.location}
         </p>
         <p className="text-gray-700 text-sm leading-relaxed">
           {internship.description}
@@ -59,24 +59,24 @@ export default function InternshipCard({ internship, isSaved = false, onSave, on
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
         {internship.salary && (
           <div>
-            <span className="font-medium text-gray-700">💰 Salary:</span>
+            <span className="font-medium text-gray-700">Salary:</span>
             <span className="text-gray-600 ml-1">{internship.salary}</span>
           </div>
         )}
         {internship.duration && (
           <div>
-            <span className="font-medium text-gray-700">⏱️ Duration:</span>
+            <span className="font-medium text-gray-700">Duration:</span>
             <span className="text-gray-600 ml-1">{internship.duration}</span>
           </div>
         )}
         {internship.job_type && (
           <div>
-            <span className="font-medium text-gray-700">📋 Type:</span>
+            <span className="font-medium text-gray-700">Type:</span>
             <span className="text-gray-600 ml-1">{internship.job_type}</span>
           </div>
         )}
         <div>
-          <span className="font-medium text-gray-700">📅 Posted:</span>
+          <span className="font-medium text-gray-700">Posted:</span>
           <span className="text-gray-600 ml-1">{internship.posted_date}</span>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default function InternshipCard({ internship, isSaved = false, onSave, on
                   : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
               }`}
             >
-              {isSaved ? '💾 Saved' : '💾 Save'}
+              {isSaved ? 'Saved' : 'Save'}
             </button>
           )}
           <a
