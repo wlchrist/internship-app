@@ -16,9 +16,19 @@ interface Internship {
 
 interface InternshipCardProps {
   internship: Internship;
+  isSaved?: boolean;
+  onSave?: (internshipId: string) => void;
+  onUnsave?: (internshipId: string) => void;
 }
 
-export default function InternshipCard({ internship }: InternshipCardProps) {
+export default function InternshipCard({ internship, isSaved = false, onSave, onUnsave }: InternshipCardProps) {
+  const handleSaveToggle = () => {
+    if (isSaved && onUnsave) {
+      onUnsave(internship.id);
+    } else if (!isSaved && onSave) {
+      onSave(internship.id);
+    }
+  };
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 border border-gray-200">
       <div className="flex justify-between items-start mb-3">
@@ -82,14 +92,28 @@ export default function InternshipCard({ internship }: InternshipCardProps) {
         <span className="text-xs text-gray-500">
           Source: {internship.source}
         </span>
-        <a
-          href={internship.source_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-        >
-          View Original Posting
-        </a>
+        <div className="flex items-center gap-2">
+          {(onSave || onUnsave) && (
+            <button
+              onClick={handleSaveToggle}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                isSaved
+                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
+            >
+              {isSaved ? '💾 Saved' : '💾 Save'}
+            </button>
+          )}
+          <a
+            href={internship.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+          >
+            View Original Posting
+          </a>
+        </div>
       </div>
     </div>
   );

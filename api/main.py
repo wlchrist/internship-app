@@ -1,12 +1,14 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from typing import List, Optional
 import uvicorn
 import asyncio
 import logging
-from models import Internship, NotificationPreferences
+from models import Internship, NotificationPreferences, UserRegister, UserLogin, Token, UserResponse, SavedJobCreate, SavedJobResponse
 from services import InternshipService
 from notification_service import NotificationService
+from user_service import UserService
+from saved_jobs_service import SavedJobsService
 
 app = FastAPI(title="Internship Aggregator API", version="1.0.0")
 
@@ -22,6 +24,8 @@ app.add_middleware(
 # Initialize services
 internship_service = InternshipService()
 notification_service = NotificationService()
+user_service = UserService()
+saved_jobs_service = SavedJobsService(internship_service)
 
 # Background task for periodic refresh and notifications
 async def periodic_refresh():
@@ -82,6 +86,100 @@ async def refresh_internships():
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
+
+# Authentication endpoints
+@app.post("/auth/register", response_model=UserResponse)
+async def register_user(user_data: UserRegister):
+    """Register a new user account"""
+    try:
+        # Validate username format
+        if not user_data.username.replace('_', '').isalnum():
+            raise HTTPException(
+                status_code=400,
+                detail="Username must contain only letters, numbers, and underscores"
+            )
+        
+        # Create user
+        user = user_service.create_user(user_data.username, user_data.password)
+        
+        if not user:
+            raise HTTPException(
+                status_code=400,
+                detail="Username already exists"
+            )
+        
+        logging.info(f"New user registered: {user.username}")
+        
+        return UserResponse(
+            id=user.id,
+            username=user.username,
+            created_at=user.created_at
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error registering user: {e}")
+        raise HTTPException(status_code=500, detail=f"Error registering user: {str(e)}")
+
+@app.post("/auth/login", response_model=Token)
+async def login_user(user_data: UserLogin):
+    """Login and receive an authentication token"""
+    try:
+        # Authenticate user
+        user = user_service.authenticate_user(user_data.username, user_data.password)
+        
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid username or password"
+            )
+        
+        # Create access token
+        access_token = user_service.create_access_token(user)
+        
+        logging.info(f"User logged in: {user.username}")
+        
+        return Token(
+            access_token=access_token,
+            token_type="bearer",
+            user_id=user.id,
+            username=user.username
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error logging in user: {e}")
+        raise HTTPException(status_code=500, detail=f"Error logging in: {str(e)}")
+
+async def get_current_user(authorization: Optional[str] = Header(None)):
+    """Helper function to get current user from token (for dependencies)"""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Extract token from "Bearer <token>" format
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            raise HTTPException(status_code=401, detail="Invalid authentication scheme")
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid authorization header format")
+    
+    # Get user from token
+    user = user_service.get_user_from_token(token)
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    
+    return user
+
+@app.get("/auth/me", response_model=UserResponse)
+async def get_current_user_info(current_user = Depends(get_current_user)):
+    """Get current user information from token"""
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        created_at=current_user.created_at
+    )
 
 # Notification endpoints
 @app.post("/notifications/subscribe")
@@ -152,6 +250,103 @@ async def send_test_notification(email: str):
         return {"message": f"Test notification sent to {sent_count} subscribers"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error sending test notification: {str(e)}")
+
+# Saved Jobs endpoints
+@app.post("/saved-jobs", response_model=SavedJobResponse)
+async def save_job(
+    saved_job: SavedJobCreate,
+    current_user = Depends(get_current_user)
+):
+    """Save an internship for the current user"""
+    try:
+        saved = saved_jobs_service.save_job(current_user.id, saved_job.internship_id)
+        
+        if not saved:
+            raise HTTPException(
+                status_code=400,
+                detail="Internship already saved or not found"
+            )
+        
+        # Get the full internship data
+        internships = await internship_service.get_internships()
+        internship = next((i for i in internships if i.id == saved_job.internship_id), None)
+        
+        if not internship:
+            raise HTTPException(
+                status_code=404,
+                detail="Internship not found"
+            )
+        
+        logging.info(f"User {current_user.username} saved internship {saved_job.internship_id}")
+        
+        return SavedJobResponse(
+            id=saved.id,
+            internship_id=saved.internship_id,
+            saved_at=saved.saved_at,
+            internship=internship
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error saving job: {e}")
+        raise HTTPException(status_code=500, detail=f"Error saving job: {str(e)}")
+
+@app.delete("/saved-jobs/{internship_id}")
+async def unsave_job(
+    internship_id: str,
+    current_user = Depends(get_current_user)
+):
+    """Remove a saved internship for the current user"""
+    try:
+        success = saved_jobs_service.unsave_job(current_user.id, internship_id)
+        
+        if not success:
+            raise HTTPException(
+                status_code=404,
+                detail="Saved job not found"
+            )
+        
+        logging.info(f"User {current_user.username} unsaved internship {internship_id}")
+        
+        return {"message": "Job unsaved successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error unsaving job: {e}")
+        raise HTTPException(status_code=500, detail=f"Error unsaving job: {str(e)}")
+
+@app.get("/saved-jobs", response_model=List[Internship])
+async def get_saved_jobs(current_user = Depends(get_current_user)):
+    """Get all saved internships for the current user"""
+    try:
+        saved_internships = await saved_jobs_service.get_saved_jobs(current_user.id)
+        return saved_internships
+    except Exception as e:
+        logging.error(f"Error getting saved jobs: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting saved jobs: {str(e)}")
+
+@app.get("/saved-jobs/check/{internship_id}")
+async def check_saved_job(
+    internship_id: str,
+    current_user = Depends(get_current_user)
+):
+    """Check if an internship is saved by the current user"""
+    try:
+        is_saved = saved_jobs_service.is_job_saved(current_user.id, internship_id)
+        return {"is_saved": is_saved}
+    except Exception as e:
+        logging.error(f"Error checking saved job: {e}")
+        raise HTTPException(status_code=500, detail=f"Error checking saved job: {str(e)}")
+
+@app.get("/saved-jobs/ids")
+async def get_saved_job_ids(current_user = Depends(get_current_user)):
+    """Get list of saved internship IDs for the current user"""
+    try:
+        saved_ids = saved_jobs_service.get_saved_job_ids(current_user.id)
+        return {"saved_job_ids": saved_ids}
+    except Exception as e:
+        logging.error(f"Error getting saved job IDs: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting saved job IDs: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

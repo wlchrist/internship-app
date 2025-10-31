@@ -34,6 +34,11 @@ env.bak/
 venv.bak/
 fastapi/
 
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
 # Environment variables
 .env
 .env.local

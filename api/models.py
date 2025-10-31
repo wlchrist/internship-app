@@ -43,3 +43,58 @@ class Internship(BaseModel):
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
+
+# User Authentication Models
+class User(BaseModel):
+    """User model with account information"""
+    id: str
+    username: str = Field(..., min_length=3, max_length=50, description="Unique username")
+    password_hash: str = Field(..., description="Hashed password")
+    created_at: datetime = Field(default_factory=datetime.now, description="Account creation date")
+
+class UserRegister(BaseModel):
+    """Request model for user registration"""
+    username: str = Field(..., min_length=3, max_length=50, description="Unique username")
+    password: str = Field(..., min_length=6, description="Password (minimum 6 characters)")
+
+class UserLogin(BaseModel):
+    """Request model for user login"""
+    username: str = Field(..., description="Username")
+    password: str = Field(..., description="Password")
+
+class Token(BaseModel):
+    """Response model for authentication token"""
+    access_token: str
+    token_type: str = "bearer"
+    user_id: str
+    username: str
+
+class UserResponse(BaseModel):
+    """Response model for user info (without password)"""
+    id: str
+    username: str
+    created_at: datetime
+
+# Saved Jobs Models
+class SavedJob(BaseModel):
+    """Model for a saved internship"""
+    id: str
+    user_id: str
+    internship_id: str
+    saved_at: datetime
+    
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+class SavedJobCreate(BaseModel):
+    """Request model for saving an internship"""
+    internship_id: str
+
+class SavedJobResponse(BaseModel):
+    """Response model for saved job"""
+    id: str
+    internship_id: str
+    saved_at: datetime
+    internship: Internship  # The full internship data

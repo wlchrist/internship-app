@@ -43,11 +43,16 @@ class InternshipService:
             all_internships = []
             
             # Make multiple API calls with different offsets to get more results
-            for offset in [0, 10, 20]:  # Get more results (3 batches)
+            # Fetch more batches to have a larger pool for filtering
+            for offset in [0, 10, 20, 30, 40, 50]:  # Get more results (6 batches = ~60 jobs from API)
                 print(f"\nFetching batch at offset {offset}...")
                 internships = await self._fetch_from_fantastic_jobs_api_with_offset(offset)
                 all_internships.extend(internships)
                 print(f"✓ Fetched {len(internships)} internships from offset {offset}")
+                
+                # Add small delay between API calls to be respectful
+                if offset < 50:
+                    await asyncio.sleep(0.5)
             
             # Remove duplicates based on job ID
             unique_internships = []
@@ -254,6 +259,15 @@ class InternshipService:
         # The API returns a list of job objects directly
         jobs = api_data if isinstance(api_data, list) else []
         
+        # Statistics tracking
+        stats = {
+            'total_jobs': len(jobs),
+            'excluded_non_cs': 0,
+            'excluded_not_internship': 0,
+            'excluded_no_cs_keyword': 0,
+            'accepted': 0
+        }
+        
         print(f"Processing {len(jobs)} jobs from API response")
         
         for i, job in enumerate(jobs):
@@ -270,25 +284,32 @@ class InternshipService:
                 locations_derived = job.get('locations_derived', [])
                 location = locations_derived[0] if locations_derived else "Location TBD"
                 
-                # Get organization description as job description
-                description = job.get('linkedin_org_description', "No description available")
+                # Get job description - prefer actual job description over company description
+                # Try to get actual job description first, fallback to company description
+                description = job.get('description', '') or job.get('job_description', '') or job.get('linkedin_org_description', "No description available")
                 if len(description) > 500:
                     description = description[:500] + "..."
 
                 # Define keywords for exclusions (non-CS fields and senior positions)
+                # IMPORTANT: Only check these in JOB TITLE, not description, to avoid false positives
+                # from company descriptions containing business/financial terms
                 exclude_keywords = [
-                    'accountant', 'accounting', 'finance', 'marketing', 'sales', 'hr',
+                    'accountant', 'accounting', 'marketing', 'sales', 'hr',
                     'human resources', 'business analyst', 'management consultant',
                     'mechanical engineer', 'civil engineer', 'electrical engineer', 
                     'chemical engineer', 'biomedical engineer', 'nurse', 'teacher',
                     'legal', 'lawyer', 'paralegal', 'medical', 'healthcare', 'pharmacy',
-                    'senior manager', 'lead', 'principal', 'staff', 'director', 'vp',
-                    'vice president', 'head of', 'chief', 'executive', 'sr.',
-                    # Add non-CS risk/analytics roles
-                    'model risk', 'risk management', 'credit risk', 'market risk',
-                    'financial risk', 'operational risk', 'compliance', 'audit',
-                    'business analytics', 'financial analytics', 'business intelligence analyst',
-                    'product manager', 'project manager', 'scrum master', 'product owner'
+                    # Senior positions (only if they appear in title, not just "lead engineer" etc)
+                    'senior manager', 'vp manager', 'vice president of', 'head of marketing',
+                    'head of sales', 'head of finance', 'chief marketing', 'chief financial',
+                    # Non-CS risk/analytics roles (but not generic "risk" which appears in CS security)
+                    'model risk intern', 'credit risk', 'market risk intern', 
+                    'financial risk intern', 'compliance intern', 'audit intern',
+                    'business analyst intern', 'financial analyst intern', 
+                    'business intelligence analyst',
+                    # Management roles (but not if it's just company description)
+                    'product manager intern', 'project manager intern', 
+                    'scrum master intern', 'product owner intern'
                 ]
                 
                 # Keywords that indicate internship/entry-level positions
@@ -319,30 +340,40 @@ class InternshipService:
                 desc_lower = description.lower()
                 full_text = f"{title_lower} {desc_lower}"
 
-                # Check for exclusions first (most restrictive)
-                is_excluded = any(keyword in title_lower or keyword in desc_lower for keyword in exclude_keywords)
+                # Check for exclusions FIRST - but ONLY in job title to avoid false positives
+                # from company descriptions that mention "management", "business", etc.
+                # This ensures we only exclude if the job title itself indicates non-CS role
+                is_excluded = any(keyword in title_lower for keyword in exclude_keywords)
                 if is_excluded:
-                    if i < 3:  # Debug for first 3 jobs
-                        print(f"Job {i+1}: '{title}' - EXCLUDED (non-CS or senior position)")
+                    stats['excluded_non_cs'] += 1
+                    if i < 5:  # Show first 5 excluded
+                        print(f"  ❌ Job {i+1}: '{title[:60]}...' - EXCLUDED (non-CS or senior position in title)")
                     continue
 
                 # Check if it's actually an internship/entry-level position
-                is_internship = any(keyword in title_lower for keyword in internship_keywords)
+                # Check both title and description (relaxed check)
+                is_internship_title = any(keyword in title_lower for keyword in internship_keywords)
+                is_internship_desc = any(keyword in desc_lower for keyword in internship_keywords)
+                is_internship = is_internship_title or is_internship_desc
+                
                 if not is_internship:
-                    if i < 3:  # Debug for first 3 jobs
-                        print(f"Job {i+1}: '{title}' - EXCLUDED (not an internship)")
+                    stats['excluded_not_internship'] += 1
+                    if i < 5:  # Show first 5 excluded
+                        print(f"  ❌ Job {i+1}: '{title[:60]}...' - EXCLUDED (not an internship)")
                     continue
 
                 # POSITIVE CHECK: Must contain at least one CS-related keyword
                 has_cs_keyword = any(keyword in full_text for keyword in cs_include_keywords)
                 if not has_cs_keyword:
-                    if i < 3:  # Debug for first 3 jobs
-                        print(f"Job {i+1}: '{title}' - EXCLUDED (no CS-related keywords)")
+                    stats['excluded_no_cs_keyword'] += 1
+                    if i < 5:  # Show first 5 excluded
+                        print(f"  ❌ Job {i+1}: '{title[:60]}...' - EXCLUDED (no CS-related keywords)")
                     continue
 
                 # All checks passed - this is a CS internship
-                if i < 3:  # Debug for first 3 jobs
-                    print(f"Job {i+1}: '{title}' - ACCEPTED (CS internship)")
+                stats['accepted'] += 1
+                if i < 5 or stats['accepted'] <= 5:  # Show first 5 accepted
+                    print(f"  ✅ Job {i+1}: '{title[:60]}...' - ACCEPTED (CS internship)")
                 
                 # Handle salary data
                 salary_raw = job.get('salary_raw', {})
@@ -395,6 +426,15 @@ class InternshipService:
             except Exception as e:
                 print(f"Error processing job {i}: {e}")
                 continue
+        
+        # Print statistics summary
+        print(f"\n  📊 Filtering Statistics:")
+        print(f"     Total jobs processed: {stats['total_jobs']}")
+        print(f"     ✅ Accepted (CS internships): {stats['accepted']}")
+        print(f"     ❌ Excluded - Non-CS/Senior: {stats['excluded_non_cs']}")
+        print(f"     ❌ Excluded - Not internship: {stats['excluded_not_internship']}")
+        print(f"     ❌ Excluded - No CS keywords: {stats['excluded_no_cs_keyword']}")
+        print(f"     📈 Acceptance rate: {(stats['accepted']/stats['total_jobs']*100):.1f}%" if stats['total_jobs'] > 0 else "     📈 Acceptance rate: 0%")
         
         return internships
     
