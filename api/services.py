@@ -35,14 +35,19 @@ class InternshipService:
     async def fetch_and_store_internships(self):
         """Fetch internships from external APIs and store them"""
         try:
+            print("=" * 60)
+            print("Fetching internships from Fantastic Jobs API...")
+            print("=" * 60)
+            
             # Try to fetch from Fantastic Jobs API with multiple calls for more results
             all_internships = []
             
             # Make multiple API calls with different offsets to get more results
-            for offset in [0, 10]:  # Get first 20 results (reduced to save API calls)
+            for offset in [0, 10, 20]:  # Get more results (3 batches)
+                print(f"\nFetching batch at offset {offset}...")
                 internships = await self._fetch_from_fantastic_jobs_api_with_offset(offset)
                 all_internships.extend(internships)
-                print(f"Fetched {len(internships)} internships from offset {offset}")
+                print(f"✓ Fetched {len(internships)} internships from offset {offset}")
             
             # Remove duplicates based on job ID
             unique_internships = []
@@ -54,20 +59,32 @@ class InternshipService:
             
             if unique_internships:
                 self.internships_cache = unique_internships
-                print(f"Total unique internships fetched: {len(unique_internships)}")
+                print(f"\n✓ Successfully fetched {len(unique_internships)} unique internships from Fantastic Jobs API")
+                print(f"✓ Companies: {', '.join(set(internship.company for internship in unique_internships[:10]))}")
             else:
-                # Fallback to mock data if API fails
-                print("API fetch failed, using mock data")
-                mock_internships = await self._fetch_mock_internships()
-                self.internships_cache = mock_internships
-                print(f"Using {len(mock_internships)} mock internships")
+                # No internships found from API - log warning but don't use mock data
+                print(f"\n⚠ WARNING: No internships found from Fantastic Jobs API")
+                print("⚠ Possible reasons:")
+                print("  - API rate limit exceeded")
+                print("  - API key invalid or expired")
+                print("  - Network connection issue")
+                print("  - API endpoint changed")
+                print(f"\n⚠ Keeping existing cache ({len(self.internships_cache)} internships)")
+                # Don't fallback to mock data - use empty cache or existing cache
+                if not self.internships_cache:
+                    print("⚠ No cached data available - will return empty list")
+                    self.internships_cache = []
 
             self.last_fetch = datetime.now()
+            print("=" * 60)
 
         except Exception as e:
-            print(f"Error fetching internships: {e}")
+            print(f"\n❌ ERROR fetching internships: {e}")
+            import traceback
+            traceback.print_exc()
             # Keep existing cache if fetch fails
             if not self.internships_cache:
+                print("⚠ No cached data available - will return empty list")
                 self.internships_cache = []
     
     async def _fetch_mock_internships(self) -> List[Internship]:
@@ -166,7 +183,7 @@ class InternshipService:
             "location_filter": "United States",
             "description_filter": "(intern OR internship OR co-op) AND (software OR programming OR development OR engineering OR computer science OR data science OR machine learning OR AI OR artificial intelligence)",
             "offset": str(offset),
-            "advanced_title_filter": "('Software Engineering' | 'Full-Stack Developer' | 'Front-End Engineering' | 'Back-End Engineering' | 'Site Reliability' | SRE | 'iOS Software' | 'Android Software' | 'AI Research' | 'AI Scientist' | 'Machine Learning Engineer' | 'Data Science' | 'Computer Vision' | 'Deep Learning' | NLP | 'Natural Language Processing' | 'Offensive Security' | 'AI Cyber Security' | 'Cloud Engineer' | AWS | Azure | DevOps | Platform | 'Data Infrastructure' | 'Quantitative Developer' | 'Quantitative Research' | 'Embedded Software' | Autonomy | Robotics | Blockchain | Web3 | AR | VR | XR | 'Growth Data' | Analytics | 'Information Security' | Risk) & Intern:*"
+            "advanced_title_filter": "('Software Engineering' | 'Full-Stack Developer' | 'Front-End Engineering' | 'Back-End Engineering' | 'Site Reliability' | SRE | 'iOS Software' | 'Android Software' | 'AI Research' | 'AI Scientist' | 'Machine Learning Engineer' | 'Data Science' | 'Computer Vision' | 'Deep Learning' | NLP | 'Natural Language Processing' | 'Cyber Security' | 'Cloud Engineer' | AWS | Azure | DevOps | Platform | 'Data Infrastructure' | 'Quantitative Developer' | 'Quantitative Research' | 'Embedded Software' | Autonomy | Robotics | Blockchain | Web3 | AR | VR | XR | 'Information Security' | 'Security Engineer' | 'Software Developer' | Programmer) & Intern:*"
         }
         
         # Build URL with parameters
@@ -174,22 +191,56 @@ class InternshipService:
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                print(f"Fetching from Fantastic Jobs API (offset {offset}): {url[:100]}...")
+                print(f"  → API Request: {base_url}?offset={offset}")
+                print(f"  → Headers: x-rapidapi-host={self.api_host}, x-rapidapi-key={'*' * 10 + self.api_key[-10:]}")
+                
                 response = await client.get(url, headers=headers)
+                
+                # Log response status
+                print(f"  → Response Status: {response.status_code}")
+                
+                if response.status_code != 200:
+                    print(f"  → Response Body: {response.text[:200]}")
+                
                 response.raise_for_status()
 
                 data = response.json()
-                print(f"API Response for offset {offset}: {len(data) if isinstance(data, list) else 'Not a list'} items")
+                
+                # Handle different response formats
+                if isinstance(data, dict):
+                    # Some APIs return data wrapped in a dict
+                    if 'data' in data:
+                        data = data['data']
+                    elif 'results' in data:
+                        data = data['results']
+                    elif 'jobs' in data:
+                        data = data['jobs']
+                    else:
+                        print(f"  ⚠ Unexpected response format: {list(data.keys())[:5]}")
+                        data = []
+                
+                if isinstance(data, list):
+                    print(f"  → Received {len(data)} raw job listings")
+                    # Transform API response to our Internship model
+                    internships = self._transform_api_response(data)
+                    print(f"  → After filtering: {len(internships)} CS internships")
+                    return internships
+                else:
+                    print(f"  ⚠ Unexpected response type: {type(data)}")
+                    print(f"  ⚠ Response sample: {str(data)[:200]}")
+                    return []
 
-                # Transform API response to our Internship model
-                internships = self._transform_api_response(data)
-                return internships
-
+        except httpx.HTTPStatusError as e:
+            print(f"  ❌ HTTP Status Error (offset {offset}): {e.response.status_code}")
+            print(f"  → Response: {e.response.text[:200] if hasattr(e.response, 'text') else 'No response body'}")
+            return []
         except httpx.HTTPError as e:
-            print(f"HTTP error fetching from Fantastic Jobs API (offset {offset}): {e}")
+            print(f"  ❌ HTTP Error (offset {offset}): {e}")
             return []
         except Exception as e:
-            print(f"Error fetching from Fantastic Jobs API (offset {offset}): {e}")
+            print(f"  ❌ Error fetching from Fantastic Jobs API (offset {offset}): {e}")
+            import traceback
+            traceback.print_exc()
             return []
 
     async def _fetch_from_fantastic_jobs_api(self) -> List[Internship]:
@@ -224,7 +275,7 @@ class InternshipService:
                 if len(description) > 500:
                     description = description[:500] + "..."
 
-                # Define keywords for exclusions and inclusions
+                # Define keywords for exclusions (non-CS fields and senior positions)
                 exclude_keywords = [
                     'accountant', 'accounting', 'finance', 'marketing', 'sales', 'hr',
                     'human resources', 'business analyst', 'management consultant',
@@ -232,7 +283,12 @@ class InternshipService:
                     'chemical engineer', 'biomedical engineer', 'nurse', 'teacher',
                     'legal', 'lawyer', 'paralegal', 'medical', 'healthcare', 'pharmacy',
                     'senior manager', 'lead', 'principal', 'staff', 'director', 'vp',
-                    'vice president', 'head of', 'chief', 'executive', 'sr.'
+                    'vice president', 'head of', 'chief', 'executive', 'sr.',
+                    # Add non-CS risk/analytics roles
+                    'model risk', 'risk management', 'credit risk', 'market risk',
+                    'financial risk', 'operational risk', 'compliance', 'audit',
+                    'business analytics', 'financial analytics', 'business intelligence analyst',
+                    'product manager', 'project manager', 'scrum master', 'product owner'
                 ]
                 
                 # Keywords that indicate internship/entry-level positions
@@ -242,10 +298,28 @@ class InternshipService:
                     'summer intern', 'winter intern', 'fall intern', 'spring intern'
                 ]
 
+                # CS-related keywords that must be present (positive inclusion)
+                cs_include_keywords = [
+                    'software', 'programming', 'developer', 'engineer', 'engineering',
+                    'data science', 'machine learning', 'ai', 'artificial intelligence',
+                    'computer science', 'cs', 'coding', 'algorithm', 'technical',
+                    'technology', 'tech', 'full stack', 'full-stack', 'frontend', 'front-end',
+                    'backend', 'back-end', 'devops', 'cloud', 'aws', 'azure', 'gcp',
+                    'python', 'java', 'javascript', 'c++', 'c#', 'react', 'node',
+                    'database', 'sql', 'nosql', 'api', 'microservices', 'kubernetes',
+                    'docker', 'git', 'version control', 'agile', 'scrum', 'sdlc',
+                    'data structure', 'computer vision', 'nlp', 'natural language processing',
+                    'deep learning', 'neural network', 'blockchain', 'web3', 'cryptocurrency',
+                    'cyber security', 'information security', 'security engineer',
+                    'quantitative', 'quant', 'embedded', 'robotics', 'autonomy',
+                    'ios', 'android', 'mobile development', 'ar', 'vr', 'xr'
+                ]
+
                 title_lower = title.lower()
                 desc_lower = description.lower()
+                full_text = f"{title_lower} {desc_lower}"
 
-                # Check for exclusions first
+                # Check for exclusions first (most restrictive)
                 is_excluded = any(keyword in title_lower or keyword in desc_lower for keyword in exclude_keywords)
                 if is_excluded:
                     if i < 3:  # Debug for first 3 jobs
@@ -259,7 +333,14 @@ class InternshipService:
                         print(f"Job {i+1}: '{title}' - EXCLUDED (not an internship)")
                     continue
 
-                # Accept only CS-related internships
+                # POSITIVE CHECK: Must contain at least one CS-related keyword
+                has_cs_keyword = any(keyword in full_text for keyword in cs_include_keywords)
+                if not has_cs_keyword:
+                    if i < 3:  # Debug for first 3 jobs
+                        print(f"Job {i+1}: '{title}' - EXCLUDED (no CS-related keywords)")
+                    continue
+
+                # All checks passed - this is a CS internship
                 if i < 3:  # Debug for first 3 jobs
                     print(f"Job {i+1}: '{title}' - ACCEPTED (CS internship)")
                 
