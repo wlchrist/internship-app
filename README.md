@@ -264,7 +264,6 @@ interface Internship {
   source_url: string;
   source: string;
   remote?: boolean;
-  job_type?: string;
 }
 ```
 

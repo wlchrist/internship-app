@@ -37,7 +37,6 @@ class Internship(BaseModel):
     source_url: str
     source: str  # e.g., "indeed", "linkedin", "glassdoor"
     remote: Optional[bool] = None
-    job_type: Optional[str] = None  # "full-time", "part-time", "contract"
     
     class Config:
         json_encoders = {

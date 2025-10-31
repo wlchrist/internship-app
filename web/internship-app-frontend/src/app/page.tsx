@@ -22,7 +22,6 @@ interface Internship {
   source_url: string;
   source: string;
   remote?: boolean;
-  job_type?: string;
 }
 
 interface FilterState {
@@ -31,7 +30,6 @@ interface FilterState {
   remoteOnly: boolean;
   salaryRange: string;
   company: string;
-  jobType: string;
 }
 
 export default function Home() {
@@ -51,7 +49,6 @@ export default function Home() {
     remoteOnly: false,
     salaryRange: '',
     company: '',
-    jobType: '',
   });
 
   const fetchInternships = async () => {
@@ -141,11 +138,6 @@ export default function Home() {
             }
             break;
         }
-      }
-
-      // Job type filter
-      if (filters.jobType && internship.job_type !== filters.jobType) {
-        return false;
       }
 
       return true;
@@ -521,7 +513,6 @@ export default function Home() {
                 remoteOnly: false,
                 salaryRange: '',
                 company: '',
-                jobType: '',
               })}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
             >

@@ -8,7 +8,6 @@ interface FilterState {
   remoteOnly: boolean;
   salaryRange: string;
   company: string;
-  jobType: string;
 }
 
 interface FilterPanelProps {
@@ -29,10 +28,6 @@ export default function FilterPanel({ filters, onFiltersChange, internships }: F
     new Set(internships.map(internship => internship.company))
   ).sort();
 
-  const uniqueJobTypes = Array.from(
-    new Set(internships.map(internship => internship.job_type).filter(Boolean))
-  ).sort();
-
   const handleFilterChange = (key: keyof FilterState, value: any) => {
     onFiltersChange({
       ...filters,
@@ -47,7 +42,6 @@ export default function FilterPanel({ filters, onFiltersChange, internships }: F
       remoteOnly: false,
       salaryRange: '',
       company: '',
-      jobType: '',
     });
   };
 
@@ -181,25 +175,6 @@ export default function FilterPanel({ filters, onFiltersChange, internships }: F
                 <option value="hourly">Hourly Rate</option>
               </select>
             </div>
-
-            {/* Job Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Job Type
-              </label>
-              <select
-                value={filters.jobType}
-                onChange={(e) => handleFilterChange('jobType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Types</option>
-                {uniqueJobTypes.map(jobType => (
-                  <option key={jobType} value={jobType}>
-                    {jobType}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
 
           {/* Filter Summary */}
@@ -230,11 +205,6 @@ export default function FilterPanel({ filters, onFiltersChange, internships }: F
                 {filters.salaryRange && (
                   <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
                     Salary: {filters.salaryRange}
-                  </span>
-                )}
-                {filters.jobType && (
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                    Type: {filters.jobType}
                   </span>
                 )}
               </div>

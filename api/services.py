@@ -108,8 +108,7 @@ class InternshipService:
                 "posted_date": datetime.now(),
                 "source_url": "https://example.com/job/1",
                 "source": "mock_api",
-                "remote": False,
-                "job_type": "full-time"
+                "remote": False
             },
             {
                 "id": "internship_2", 
@@ -123,8 +122,7 @@ class InternshipService:
                 "posted_date": datetime.now(),
                 "source_url": "https://example.com/job/2",
                 "source": "mock_api",
-                "remote": True,
-                "job_type": "full-time"
+                "remote": True
             },
             {
                 "id": "internship_3",
@@ -138,8 +136,7 @@ class InternshipService:
                 "posted_date": datetime.now(),
                 "source_url": "https://example.com/job/3",
                 "source": "mock_api",
-                "remote": False,
-                "job_type": "part-time"
+                "remote": False
             },
             {
                 "id": "internship_4",
@@ -153,8 +150,7 @@ class InternshipService:
                 "posted_date": datetime.now(),
                 "source_url": "https://example.com/job/4",
                 "source": "mock_api",
-                "remote": True,
-                "job_type": "full-time"
+                "remote": True
             },
             {
                 "id": "internship_5",
@@ -168,8 +164,7 @@ class InternshipService:
                 "posted_date": datetime.now(),
                 "source_url": "https://example.com/job/5",
                 "source": "mock_api",
-                "remote": False,
-                "job_type": "full-time"
+                "remote": False
             }
         ]
         
@@ -389,14 +384,6 @@ class InternshipService:
                         elif min_val:
                             salary = f"${min_val}/{unit.lower()}"
                 
-                # Handle employment type
-                employment_types = job.get('employment_type', [])
-                job_type = "Internship"
-                if employment_types and 'INTERN' in employment_types:
-                    job_type = "Internship"
-                elif employment_types:
-                    job_type = employment_types[0].title()
-                
                 # Handle remote work
                 remote = job.get('remote_derived', False)
                 
@@ -417,8 +404,7 @@ class InternshipService:
                     posted_date=posted_date,
                     source_url=job.get('url', f"https://fantasticjobs.com/job/{i}"),
                     source="Fantastic Jobs",
-                    remote=remote,
-                    job_type=job_type
+                    remote=remote
                 )
                 
                 internships.append(internship)

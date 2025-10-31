@@ -11,7 +11,6 @@ interface Internship {
   source_url: string;
   source: string;
   remote?: boolean;
-  job_type?: string;
 }
 
 interface InternshipCardProps {
@@ -57,12 +56,6 @@ export default function InternshipCard({ internship }: InternshipCardProps) {
           <div>
             <span className="font-medium text-gray-700">⏱️ Duration:</span>
             <span className="text-gray-600 ml-1">{internship.duration}</span>
-          </div>
-        )}
-        {internship.job_type && (
-          <div>
-            <span className="font-medium text-gray-700">📋 Type:</span>
-            <span className="text-gray-600 ml-1">{internship.job_type}</span>
           </div>
         )}
         <div>
