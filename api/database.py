@@ -9,11 +9,20 @@ from datetime import datetime
 from contextlib import contextmanager
 from models import User
 
-# Database file path
-DB_PATH = os.path.join(os.path.dirname(__file__), "internship_app.db")
+# Database file path (configurable via environment for Docker)
+# Default: a file next to this module for local dev, but containers should
+# set `DB_PATH=/data/internship_app.db` to allow mounting a volume at /data.
+DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "internship_app.db"))
 
 def get_db_connection():
-    """Get a database connection"""
+    """Get a database connection. Ensure the parent directory exists."""
+    dirpath = os.path.dirname(DB_PATH)
+    if dirpath:
+        try:
+            os.makedirs(dirpath, exist_ok=True)
+        except Exception:
+            # If directory creation fails, continue and let sqlite raise a helpful error
+            pass
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row  # Enable column access by name
     return conn

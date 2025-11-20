@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  backend:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: internship-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_PATH=/data/internship_app.db
+      - SECRET_KEY=${SECRET_KEY:-change-me}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+    volumes:
+      - db_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./web/internship-app-frontend
+      dockerfile: Dockerfile
+    container_name: internship-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+
+# Using a Docker named volume `db_data` to store the SQLite DB file. This keeps
+# the data managed by Docker and reduces host-OS filesystem issues.
+
+volumes:
+  db_data: {}

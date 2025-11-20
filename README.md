@@ -299,6 +299,34 @@ app.add_middleware(
 
 ## Deployment
 
+**Using Docker (Recommended for local & multi-machine runs)**
+
+This repository includes a `docker-compose.yml` and Dockerfiles for both the backend and frontend. The compose file uses a host bind mount (`./data:/data`) so the SQLite database file is stored inside the project directory. This makes the setup portable across machines (no named volume required) and easy to back up.
+
+Quick steps:
+
+```zsh
+# (1) Copy example env and edit secrets
+cp .env.example .env
+# (2) Ensure data directory exists so containers can write the DB file
+mkdir -p ./data
+# (3) Build and start services
+docker compose up --build
+```
+
+Services:
+- Backend: `http://localhost:8000` (OpenAPI at `/docs`)
+- Frontend: `http://localhost:3000`
+
+Persistence details:
+- The SQLite file will be created at `./data/internship_app.db` on the host. Keep that directory under versioned backups if you need to preserve application data across machines or re-deploys.
+- If you prefer a Docker named volume instead of a host directory, replace the `./data:/data` volume in `docker-compose.yml` with a named volume (previously `db_data:/data`).
+
+Security & env vars:
+- The compose file reads environment variables from a `.env` file in the project root. Do not commit secrets to git.
+
+Now the usual Backend / Frontend subsections follow.
+
 ### Backend Deployment
 
 1. **Using Docker**:

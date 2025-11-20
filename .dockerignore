@@ -1,0 +1,13 @@
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+env.example
+.env
+node_modules
+.next
+dist
+build
+.DS_Store

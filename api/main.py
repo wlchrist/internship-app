@@ -10,7 +10,7 @@ from notification_service import NotificationService
 from user_service import UserService
 from saved_jobs_service import SavedJobsService
 
-app = FastAPI(title="Internship Aggregator API", version="1.0.0")
+app = FastAPI(title="Internship Aggregator API", version="1.1.0")
 
 # Configure CORS to allow frontend requests
 app.add_middleware(
